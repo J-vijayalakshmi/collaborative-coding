@@ -94,24 +94,24 @@ const Dashboard = () => {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <Code className="w-5 h-5 text-white" />
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                <Code className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">CodeCollab</span>
+              <span className="text-lg sm:text-xl font-bold text-white">CodeCollab</span>
             </div>
             
-            <div className="flex items-center gap-4">
-              <span className="text-gray-400">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <span className="text-gray-400 text-sm hidden sm:block">
                 {user?.displayName || user?.email}
               </span>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition text-sm"
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
@@ -119,24 +119,25 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Actions */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Dashboard</h1>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
-            Create Room
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Create Room</span>
+            <span className="sm:hidden">New</span>
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6">
           <button
             onClick={() => setActiveTab('my-rooms')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
               activeTab === 'my-rooms'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
@@ -146,7 +147,7 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('public')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
               activeTab === 'public'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'

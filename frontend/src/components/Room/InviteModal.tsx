@@ -4,12 +4,10 @@ import { X, Copy, Check, Link2, Mail, MessageCircle, QrCode } from 'lucide-react
 interface InviteModalProps {
   roomId: string
   roomName: string
-  isPrivate: boolean
-  password?: string
   onClose: () => void
 }
 
-const InviteModal = ({ roomId, roomName, isPrivate, password, onClose }: InviteModalProps) => {
+const InviteModal = ({ roomId, roomName, onClose }: InviteModalProps) => {
   const [copied, setCopied] = useState<string | null>(null)
   const [showQR, setShowQR] = useState(false)
 
@@ -24,14 +22,14 @@ const InviteModal = ({ roomId, roomName, isPrivate, password, onClose }: InviteM
   const shareViaEmail = () => {
     const subject = encodeURIComponent(`Join my coding session: ${roomName}`)
     const body = encodeURIComponent(
-      `Hey!\n\nI'd like you to join my collaborative coding session.\n\nRoom: ${roomName}\nLink: ${roomLink}${isPrivate ? `\nPassword: ${password}` : ''}\n\nSee you there!`
+      `Hey!\n\nI'd like you to join my collaborative coding session.\n\nRoom: ${roomName}\nLink: ${roomLink}\n\nSee you there!`
     )
     window.open(`mailto:?subject=${subject}&body=${body}`)
   }
 
   const shareViaWhatsApp = () => {
     const text = encodeURIComponent(
-      `Join my coding session: ${roomName}\n${roomLink}${isPrivate ? `\nPassword: ${password}` : ''}`
+      `Join my coding session: ${roomName}\n${roomLink}`
     )
     window.open(`https://wa.me/?text=${text}`)
   }
@@ -42,8 +40,8 @@ const InviteModal = ({ roomId, roomName, isPrivate, password, onClose }: InviteM
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-xl w-full max-w-md shadow-2xl border border-gray-700 overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-800 rounded-xl w-full max-w-md shadow-2xl border border-gray-700 overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -83,27 +81,6 @@ const InviteModal = ({ roomId, roomName, isPrivate, password, onClose }: InviteM
               </button>
             </div>
           </div>
-
-          {/* Password (if private) */}
-          {isPrivate && password && (
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Room Password</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={password}
-                  readOnly
-                  className="flex-1 px-4 py-2.5 bg-gray-900 border border-gray-600 rounded-lg text-gray-300 text-sm focus:outline-none font-mono"
-                />
-                <button
-                  onClick={() => copyToClipboard(password, 'password')}
-                  className="px-4 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2"
-                >
-                  {copied === 'password' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* QR Code */}
           <div>
@@ -147,7 +124,7 @@ const InviteModal = ({ roomId, roomName, isPrivate, password, onClose }: InviteM
           {/* Copy All */}
           <button
             onClick={() => copyToClipboard(
-              `Room: ${roomName}\nLink: ${roomLink}${isPrivate ? `\nPassword: ${password}` : ''}`,
+              `Room: ${roomName}\nLink: ${roomLink}`,
               'all'
             )}
             className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center justify-center gap-2"

@@ -454,32 +454,32 @@ const Room = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+      <header className="bg-gray-800 border-b border-gray-700 px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={handleLeaveRoom}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Code className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Code className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <div>
-                <h1 className="text-white font-semibold">{room.name}</h1>
-                <p className="text-xs text-gray-500">by {room.ownerName}</p>
+              <div className="min-w-0">
+                <h1 className="text-white font-semibold text-sm sm:text-base truncate max-w-[100px] sm:max-w-none">{room.name}</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">by {room.ownerName}</p>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             {/* Language Selector */}
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[80px] sm:max-w-none"
             >
               {SUPPORTED_LANGUAGES.map((lang) => (
                 <option key={lang.id} value={lang.id}>
@@ -490,7 +490,7 @@ const Room = () => {
 
             {/* Participants - with tooltip */}
             <div 
-              className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-lg text-gray-300 text-sm cursor-pointer group relative"
+              className="hidden sm:flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-700 rounded-lg text-gray-300 text-xs sm:text-sm cursor-pointer group relative"
               title={`Participants: ${room.participants?.join(', ') || 'None'}`}
             >
               <Users className="w-4 h-4" />
@@ -504,7 +504,7 @@ const Room = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
+              className="p-1.5 sm:p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
               title={theme === 'vs-dark' ? 'Light mode' : 'Dark mode'}
             >
               {theme === 'vs-dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -513,7 +513,7 @@ const Room = () => {
             {/* Download Code */}
             <button
               onClick={handleDownload}
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
+              className="hidden sm:block p-1.5 sm:p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
               title="Download code"
             >
               <Download className="w-4 h-4" />
@@ -522,7 +522,7 @@ const Room = () => {
             {/* Share/Invite */}
             <button
               onClick={() => setShowInviteModal(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-sm transition"
+              className="p-1.5 sm:p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
               title="Share room"
             >
               <Share2 className="w-4 h-4" />
@@ -531,7 +531,7 @@ const Room = () => {
             {/* Room Settings */}
             <button
               onClick={() => setShowSettingsModal(true)}
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
+              className="hidden sm:block p-1.5 sm:p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
               title="Room settings"
             >
               <Settings className="w-4 h-4" />
@@ -541,14 +541,14 @@ const Room = () => {
             <button
               onClick={handleExecute}
               disabled={executing}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white rounded-lg text-sm transition"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white rounded-lg text-xs sm:text-sm transition"
             >
               {executing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Play className="w-4 h-4" />
               )}
-              Run
+              <span className="hidden sm:inline">Run</span>
             </button>
           </div>
         </div>
@@ -633,18 +633,21 @@ const Room = () => {
       {!showChat && (
         <button
           onClick={() => setShowChat(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-40"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-40"
           title="Open Chat"
         >
-          <MessageSquare className="w-6 h-6" />
+          <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       )}
 
       {/* Floating Chat Window */}
       {showChat && roomId && (
         <div 
-          className="fixed bottom-6 right-6 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden z-40"
-          style={{ width: chatWidth, height: chatHeight }}
+          className="fixed inset-4 sm:inset-auto sm:bottom-6 sm:right-6 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden z-40"
+          style={{ 
+            width: window.innerWidth < 640 ? 'auto' : chatWidth, 
+            height: window.innerWidth < 640 ? 'auto' : chatHeight 
+          }}
         >
           {/* Chat Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
@@ -675,8 +678,6 @@ const Room = () => {
         <InviteModal
           roomId={roomId}
           roomName={room.name}
-          isPrivate={room.isPrivate}
-          password={room.password}
           onClose={() => setShowInviteModal(false)}
         />
       )}
