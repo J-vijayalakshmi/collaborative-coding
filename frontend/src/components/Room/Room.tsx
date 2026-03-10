@@ -34,6 +34,7 @@ import Chat from './ChatEnhanced'
 import InviteModal from './InviteModal'
 import RoomSettings from './RoomSettings'
 import VideoChat from './VideoChat'
+import IncomingCall from './IncomingCall'
 
 // Helper function to darken colors for light theme visibility
 const darkenColor = (color: string): string => {
@@ -322,7 +323,8 @@ const Room = () => {
     setOutput('')
     
     try {
-      const response = await axios.post('http://localhost:5000/api/execute', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const response = await axios.post(`${apiUrl}/api/execute`, {
         code,
         language,
       })
@@ -568,7 +570,7 @@ const Room = () => {
             options={{
               fontSize: 14,
               fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-              minimap: { enabled: true },
+              minimap: { enabled: window.innerWidth > 768 },
               scrollBeyondLastLine: false,
               automaticLayout: true,
               tabSize: 2,
@@ -578,6 +580,16 @@ const Room = () => {
               cursorBlinking: 'smooth',
               smoothScrolling: true,
               padding: { top: 16 },
+              // Mobile optimizations
+              quickSuggestions: window.innerWidth > 768,
+              parameterHints: { enabled: window.innerWidth > 768 },
+              suggestOnTriggerCharacters: window.innerWidth > 768,
+              acceptSuggestionOnEnter: 'off',
+              tabCompletion: 'off',
+              wordBasedSuggestions: 'off',
+              contextmenu: true,
+              mouseStyle: 'text',
+              selectOnLineNumbers: true,
             }}
           />
         </div>
@@ -688,6 +700,16 @@ const Room = () => {
           currentUserId={user.uid}
           onClose={() => setShowSettingsModal(false)}
           onRoomDeleted={() => navigate('/dashboard')}
+        />
+      )}
+
+      {/* Incoming Call Notification */}
+      {!showVideoChat && user && roomId && (
+        <IncomingCall
+          roomId={roomId}
+          currentUserId={user.uid}
+          onAccept={() => setShowVideoChat(true)}
+          onDecline={() => {}}
         />
       )}
 
