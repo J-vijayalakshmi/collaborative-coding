@@ -27,7 +27,8 @@ import {
   Settings,
   Share2,
   Sun,
-  Moon
+  Moon,
+  TextSelect
 } from 'lucide-react'
 import axios from 'axios'
 import Chat from './ChatEnhanced'
@@ -519,6 +520,23 @@ const Room = () => {
               {theme === 'vs-dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
+            {/* Select All - Mobile only */}
+            <button
+              onClick={() => {
+                if (editorRef.current) {
+                  const model = editorRef.current.getModel()
+                  if (model) {
+                    editorRef.current.setSelection(model.getFullModelRange())
+                    editorRef.current.focus()
+                  }
+                }
+              }}
+              className="sm:hidden p-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
+              title="Select all code"
+            >
+              <TextSelect className="w-4 h-4" />
+            </button>
+
             {/* Download Code */}
             <button
               onClick={handleDownload}
@@ -594,10 +612,11 @@ const Room = () => {
               acceptSuggestionOnEnter: 'off',
               tabCompletion: 'off',
               wordBasedSuggestions: 'off',
-              // Enable context menu on mobile for copy/paste on selection
+              // Enable context menu for copy/paste
               contextmenu: true,
               mouseStyle: 'text',
-              selectOnLineNumbers: window.innerWidth > 768,
+              // Enable tap on line numbers to select line (works on mobile)
+              selectOnLineNumbers: true,
               // Mobile-specific: simple thin cursor
               cursorStyle: window.innerWidth > 768 ? 'line' : 'line-thin',
               cursorWidth: window.innerWidth > 768 ? 2 : 1,
@@ -606,12 +625,14 @@ const Room = () => {
               occurrencesHighlight: 'off',
               folding: window.innerWidth > 768,
               glyphMargin: false,
-              lineDecorationsWidth: window.innerWidth > 768 ? 10 : 0,
+              lineDecorationsWidth: window.innerWidth > 768 ? 10 : 5,
               lineNumbersMinChars: window.innerWidth > 768 ? 5 : 3,
               // Disable hover on mobile
               hover: { enabled: window.innerWidth > 768 },
               // Links disabled on mobile
               links: window.innerWidth > 768,
+              // Enable drag and drop selection
+              dragAndDrop: true,
             }}
           />
         </div>
