@@ -271,6 +271,34 @@ const Room = () => {
     editorRef.current = editor
     monacoRef.current = monaco
 
+    // Mobile-specific: disable context menu action
+    const isMobile = window.innerWidth <= 768
+    if (isMobile) {
+      // Disable the editor's context menu entirely on mobile
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {}) // Disable find
+      
+      // Get the editor DOM node and prevent native context menu
+      const editorDomNode = editor.getDomNode()
+      if (editorDomNode) {
+        editorDomNode.addEventListener('contextmenu', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        })
+        // Prevent text selection popups on long press
+        editorDomNode.style.webkitUserSelect = 'none'
+        editorDomNode.style.userSelect = 'none'
+        
+        // Re-enable for the actual input area after a short delay
+        setTimeout(() => {
+          const textArea = editorDomNode.querySelector('textarea')
+          if (textArea) {
+            textArea.style.webkitUserSelect = 'text'
+            textArea.style.userSelect = 'text'
+          }
+        }, 100)
+      }
+    }
+
     // Listen for cursor position changes
     editor.onDidChangeCursorPosition((e) => {
       if (!roomId || !user) return
@@ -568,7 +596,7 @@ const Room = () => {
             onMount={handleEditorMount}
             theme={theme}
             options={{
-              fontSize: 14,
+              fontSize: window.innerWidth > 768 ? 14 : 13,
               fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
               minimap: { enabled: window.innerWidth > 768 },
               scrollBeyondLastLine: false,
@@ -576,20 +604,34 @@ const Room = () => {
               tabSize: 2,
               wordWrap: 'on',
               lineNumbers: 'on',
-              renderLineHighlight: 'all',
+              renderLineHighlight: window.innerWidth > 768 ? 'all' : 'none',
               cursorBlinking: 'smooth',
               smoothScrolling: true,
               padding: { top: 16 },
-              // Mobile optimizations
+              // Mobile optimizations - disable features that cause issues
               quickSuggestions: window.innerWidth > 768,
               parameterHints: { enabled: window.innerWidth > 768 },
               suggestOnTriggerCharacters: window.innerWidth > 768,
               acceptSuggestionOnEnter: 'off',
               tabCompletion: 'off',
               wordBasedSuggestions: 'off',
-              contextmenu: true,
+              // Disable context menu on mobile to prevent native menu
+              contextmenu: window.innerWidth > 768,
               mouseStyle: 'text',
-              selectOnLineNumbers: true,
+              selectOnLineNumbers: window.innerWidth > 768,
+              // Mobile-specific: simpler cursor and selection
+              cursorStyle: window.innerWidth > 768 ? 'line' : 'line-thin',
+              cursorWidth: window.innerWidth > 768 ? 2 : 1,
+              selectionHighlight: window.innerWidth > 768,
+              occurrencesHighlight: 'off',
+              folding: window.innerWidth > 768,
+              glyphMargin: false,
+              lineDecorationsWidth: window.innerWidth > 768 ? 10 : 0,
+              lineNumbersMinChars: window.innerWidth > 768 ? 5 : 3,
+              // Disable hover on mobile
+              hover: { enabled: window.innerWidth > 768 },
+              // Links disabled on mobile
+              links: window.innerWidth > 768,
             }}
           />
         </div>
