@@ -70,6 +70,9 @@ const Room = () => {
   const [showVideoChat, setShowVideoChat] = useState(false)
   const [outputHeight, setOutputHeight] = useState(200)
   const [isResizingOutput, setIsResizingOutput] = useState(false)
+  const [showLineSelector, setShowLineSelector] = useState(false)
+  const [lineStart, setLineStart] = useState('')
+  const [lineEnd, setLineEnd] = useState('')
   const outputResizeStartRef = useRef<{ y: number; height: number } | null>(null)
   
   // Chat window dimensions
@@ -272,11 +275,36 @@ const Room = () => {
     editorRef.current = editor
     monacoRef.current = monaco
 
-    // Mobile-specific: keep editor simple but allow text selection
+    // Mobile-specific: better touch handling
     const isMobile = window.innerWidth <= 768
     if (isMobile) {
       // Disable keyboard shortcuts that don't work well on mobile
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {}) // Disable find dialog
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {})
+      
+      // Double-tap to select word on mobile
+      let lastTapTime = 0
+      const editorDom = editor.getDomNode()
+      if (editorDom) {
+        editorDom.addEventListener('touchend', (e) => {
+          const now = Date.now()
+          if (now - lastTapTime < 300) {
+            // Double tap detected - select word at cursor
+            const position = editor.getPosition()
+            if (position) {
+              const word = editor.getModel()?.getWordAtPosition(position)
+              if (word) {
+                editor.setSelection({
+                  startLineNumber: position.lineNumber,
+                  startColumn: word.startColumn,
+                  endLineNumber: position.lineNumber,
+                  endColumn: word.endColumn
+                })
+              }
+            }
+          }
+          lastTapTime = now
+        })
+      }
     }
 
     // Listen for cursor position changes
@@ -520,19 +548,11 @@ const Room = () => {
               {theme === 'vs-dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Select All - Mobile only */}
+            {/* Select Lines - Mobile only */}
             <button
-              onClick={() => {
-                if (editorRef.current) {
-                  const model = editorRef.current.getModel()
-                  if (model) {
-                    editorRef.current.setSelection(model.getFullModelRange())
-                    editorRef.current.focus()
-                  }
-                }
-              }}
+              onClick={() => setShowLineSelector(true)}
               className="sm:hidden p-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition"
-              title="Select all code"
+              title="Select lines"
             >
               <TextSelect className="w-4 h-4" />
             </button>
@@ -612,8 +632,8 @@ const Room = () => {
               acceptSuggestionOnEnter: 'off',
               tabCompletion: 'off',
               wordBasedSuggestions: 'off',
-              // Enable context menu for copy/paste
-              contextmenu: true,
+              // Disable context menu on mobile (not useful)
+              contextmenu: window.innerWidth > 768,
               mouseStyle: 'text',
               // Enable tap on line numbers to select line (works on mobile)
               selectOnLineNumbers: true,
@@ -744,6 +764,96 @@ const Room = () => {
           onClose={() => setShowSettingsModal(false)}
           onRoomDeleted={() => navigate('/dashboard')}
         />
+      )}
+
+      {/* Line Selector Modal - Mobile */}
+      {showLineSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-4 w-full max-w-xs">
+            <h3 className="text-white font-medium mb-3">Select Lines</h3>
+            <div className="flex gap-2 mb-3">
+              <div className="flex-1">
+                <label className="text-gray-400 text-xs mb-1 block">From</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={lineStart}
+                  onChange={(e) => setLineStart(e.target.value)}
+                  placeholder="1"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-gray-400 text-xs mb-1 block">To</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={lineEnd}
+                  onChange={(e) => setLineEnd(e.target.value)}
+                  placeholder="10"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowLineSelector(false)
+                  setLineStart('')
+                  setLineEnd('')
+                }}
+                className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (editorRef.current) {
+                    const model = editorRef.current.getModel()
+                    if (model) {
+                      const start = parseInt(lineStart) || 1
+                      const end = parseInt(lineEnd) || start
+                      const maxLine = model.getLineCount()
+                      const validStart = Math.max(1, Math.min(start, maxLine))
+                      const validEnd = Math.max(validStart, Math.min(end, maxLine))
+                      
+                      editorRef.current.setSelection({
+                        startLineNumber: validStart,
+                        startColumn: 1,
+                        endLineNumber: validEnd,
+                        endColumn: model.getLineMaxColumn(validEnd)
+                      })
+                      editorRef.current.focus()
+                    }
+                  }
+                  setShowLineSelector(false)
+                  setLineStart('')
+                  setLineEnd('')
+                }}
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+              >
+                Select
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                if (editorRef.current) {
+                  const model = editorRef.current.getModel()
+                  if (model) {
+                    editorRef.current.setSelection(model.getFullModelRange())
+                    editorRef.current.focus()
+                  }
+                }
+                setShowLineSelector(false)
+                setLineStart('')
+                setLineEnd('')
+              }}
+              className="w-full mt-2 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
+            >
+              Select All
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Incoming Call Notification */}
