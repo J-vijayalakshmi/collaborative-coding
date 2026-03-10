@@ -29,17 +29,10 @@ body {
   border-radius: 8px;
 }
 
-/* Mobile: Disable native text selection handles and context menu */
+/* Mobile: Clean editor experience */
 @media (max-width: 768px) {
   .monaco-editor {
-    -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-  }
-  
-  .monaco-editor .view-overlays,
-  .monaco-editor .margin-view-overlays {
-    -webkit-user-select: none;
-    user-select: none;
   }
   
   /* Hide cursor decorations on mobile for cleaner look */
@@ -51,11 +44,6 @@ body {
   .monaco-editor .current-line {
     border: none !important;
     background: transparent !important;
-  }
-  
-  /* Disable selection highlights that cause issues */
-  .monaco-editor .selectionHighlight {
-    display: none !important;
   }
 }
 

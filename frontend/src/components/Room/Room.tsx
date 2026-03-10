@@ -271,32 +271,11 @@ const Room = () => {
     editorRef.current = editor
     monacoRef.current = monaco
 
-    // Mobile-specific: disable context menu action
+    // Mobile-specific: keep editor simple but allow text selection
     const isMobile = window.innerWidth <= 768
     if (isMobile) {
-      // Disable the editor's context menu entirely on mobile
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {}) // Disable find
-      
-      // Get the editor DOM node and prevent native context menu
-      const editorDomNode = editor.getDomNode()
-      if (editorDomNode) {
-        editorDomNode.addEventListener('contextmenu', (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        })
-        // Prevent text selection popups on long press
-        editorDomNode.style.webkitUserSelect = 'none'
-        editorDomNode.style.userSelect = 'none'
-        
-        // Re-enable for the actual input area after a short delay
-        setTimeout(() => {
-          const textArea = editorDomNode.querySelector('textarea')
-          if (textArea) {
-            textArea.style.webkitUserSelect = 'text'
-            textArea.style.userSelect = 'text'
-          }
-        }, 100)
-      }
+      // Disable keyboard shortcuts that don't work well on mobile
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {}) // Disable find dialog
     }
 
     // Listen for cursor position changes
@@ -608,21 +587,22 @@ const Room = () => {
               cursorBlinking: 'smooth',
               smoothScrolling: true,
               padding: { top: 16 },
-              // Mobile optimizations - disable features that cause issues
+              // Mobile optimizations - disable autocomplete features
               quickSuggestions: window.innerWidth > 768,
               parameterHints: { enabled: window.innerWidth > 768 },
               suggestOnTriggerCharacters: window.innerWidth > 768,
               acceptSuggestionOnEnter: 'off',
               tabCompletion: 'off',
               wordBasedSuggestions: 'off',
-              // Disable context menu on mobile to prevent native menu
-              contextmenu: window.innerWidth > 768,
+              // Enable context menu on mobile for copy/paste on selection
+              contextmenu: true,
               mouseStyle: 'text',
               selectOnLineNumbers: window.innerWidth > 768,
-              // Mobile-specific: simpler cursor and selection
+              // Mobile-specific: simple thin cursor
               cursorStyle: window.innerWidth > 768 ? 'line' : 'line-thin',
               cursorWidth: window.innerWidth > 768 ? 2 : 1,
-              selectionHighlight: window.innerWidth > 768,
+              // Keep selection visible on mobile
+              selectionHighlight: true,
               occurrencesHighlight: 'off',
               folding: window.innerWidth > 768,
               glyphMargin: false,
