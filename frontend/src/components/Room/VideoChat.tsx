@@ -27,6 +27,17 @@ const ICE_SERVERS = {
     { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'stun:stun3.l.google.com:19302' },
     { urls: 'stun:stun4.l.google.com:19302' },
+    // Free TURN server for NAT traversal
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ]
 }
 
@@ -238,16 +249,38 @@ const VideoChat = ({ roomId, roomName, userName, userId, onClose }: VideoChatPro
       const callSnapshot = await getDoc(callDoc)
       const existingData = callSnapshot.data()
       
+      console.log('Checking for existing call:', existingData)
+      
       if (existingData?.offer && existingData.offererId !== userId && !existingData.answer) {
         // Answer existing call
+        console.log('Answering existing call from:', existingData.offererName)
         await answerCall(pc, existingData.offer, existingData.offererName || 'User')
         setIsConnecting(false)
-      } else {
-        // Delete old call data and create new call
-        try {
-          await deleteDoc(callDoc)
-        } catch {}
+      } else if (existingData?.offer && existingData.offererId === userId) {
+        // We already have an offer from ourselves, restore the connection
+        console.log('Resuming our existing call')
         await createOffer(pc)
+        setIsConnecting(false)
+      } else {
+        // Create new call - add small random delay to reduce race conditions
+        const delay = Math.random() * 500
+        console.log(`Creating new call with ${delay}ms delay`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+        
+        // Re-check if someone else created a call while we waited
+        const recheck = await getDoc(callDoc)
+        const recheckData = recheck.data()
+        
+        if (recheckData?.offer && recheckData.offererId !== userId && !recheckData.answer) {
+          console.log('Found offer during delay, answering instead')
+          await answerCall(pc, recheckData.offer, recheckData.offererName || 'User')
+        } else {
+          // Safe to create offer
+          try {
+            await deleteDoc(callDoc)
+          } catch {}
+          await createOffer(pc)
+        }
         setIsConnecting(false)
       }
     }
