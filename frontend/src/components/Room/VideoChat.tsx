@@ -25,6 +25,8 @@ const ICE_SERVERS = {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
   ]
 }
 
@@ -198,15 +200,29 @@ const VideoChat = ({ roomId, roomName, userName, userId, onClose }: VideoChatPro
 
       // Handle remote stream
       pc.ontrack = (event) => {
-        if (remoteVideoRef.current && event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0]
+        console.log('ontrack fired:', event.streams)
+        if (event.streams[0]) {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = event.streams[0]
+          }
           setIsConnected(true)
+          setIsConnecting(false)
           setParticipantCount(2)
+        }
+      }
+
+      // Handle ICE connection state
+      pc.oniceconnectionstatechange = () => {
+        console.log('ICE state:', pc.iceConnectionState)
+        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+          setIsConnecting(false)
+          setIsConnected(true)
         }
       }
 
       // Handle connection state
       pc.onconnectionstatechange = () => {
+        console.log('Connection state:', pc.connectionState)
         if (pc.connectionState === 'connected') {
           setIsConnecting(false)
           setIsConnected(true)
@@ -334,7 +350,7 @@ const VideoChat = ({ roomId, roomName, userName, userId, onClose }: VideoChatPro
 
       {/* Video Container - Grid layout for both videos */}
       <div className={`relative bg-gray-950 ${isFullscreen ? 'flex-1' : ''}`}>
-        <div className={`grid ${isConnected ? 'grid-cols-2' : 'grid-cols-1'} gap-1 p-1 ${isFullscreen ? 'h-full' : 'h-40'}`}>
+        <div className={`grid grid-cols-2 gap-1 p-1 ${isFullscreen ? 'h-full' : 'h-40'}`}>
           {/* Local Video */}
           <div className="relative bg-gray-800 rounded-lg overflow-hidden">
             <video
@@ -355,36 +371,30 @@ const VideoChat = ({ roomId, roomName, userName, userId, onClose }: VideoChatPro
             </div>
           </div>
 
-          {/* Remote Video */}
-          {isConnected ? (
-            <div className="relative bg-gray-800 rounded-lg overflow-hidden">
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
+          {/* Remote Video - Always render, show placeholder if not connected */}
+          <div className="relative bg-gray-800 rounded-lg overflow-hidden">
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={`w-full h-full object-cover ${isConnected ? '' : 'hidden'}`}
+            />
+            {!isConnected && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center p-2">
+                  <Users className="w-6 h-6 text-gray-500 mx-auto mb-1" />
+                  <span className="text-xs text-gray-500">
+                    {isConnecting ? 'Connecting...' : 'Waiting for peer...'}
+                  </span>
+                </div>
+              </div>
+            )}
+            {isConnected && (
               <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-xs text-white">
                 {remoteUserName || 'Peer'}
               </div>
-            </div>
-          ) : (
-            <div className="relative bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
-              <div className="text-center p-2">
-                <Users className="w-6 h-6 text-gray-500 mx-auto mb-1" />
-                <span className="text-xs text-gray-500">
-                  {isConnecting ? 'Connecting...' : 'Waiting...'}
-                </span>
-              </div>
-              {/* Hidden remote video for when connection establishes */}
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="hidden"
-              />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
