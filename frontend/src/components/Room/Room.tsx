@@ -285,7 +285,7 @@ const Room = () => {
       let lastTapTime = 0
       const editorDom = editor.getDomNode()
       if (editorDom) {
-        editorDom.addEventListener('touchend', (e) => {
+        editorDom.addEventListener('touchend', () => {
           const now = Date.now()
           if (now - lastTapTime < 300) {
             // Double tap detected - select word at cursor
